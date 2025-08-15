@@ -1,0 +1,711 @@
+/* style.css - AI 던전 마스터 스타일 */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    font-family: 'Press Start 2P', monospace;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.game-wrapper {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+}
+
+/* 메인 게임 컨테이너 */
+.game-container {
+    background: #0a0a0a;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+/* 게임 헤더 */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #FFD700;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.stat-group {
+    display: flex;
+    gap: 15px;
+}
+
+.stat {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.floor-display {
+    text-align: center;
+}
+
+.floor-text {
+    font-size: 10px;
+    color: #FFD700;
+    display: block;
+}
+
+.floor-number {
+    font-size: 24px;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* HP/EXP 바 */
+.hp-bar, .exp-bar {
+    width: 120px;
+    height: 20px;
+    background: #333;
+    border: 2px solid #666;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+    transition: width 0.3s ease;
+}
+
+.exp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4ecdc4, #44a3aa);
+    transition: width 0.3s ease;
+}
+
+.hp-text, .exp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    text-shadow: 1px 1px 2px black;
+}
+
+/* 게임 보드 */
+.game-board {
+    width: 600px;
+    height: 600px;
+    display: grid;
+    grid-template-columns: repeat(15, 40px);
+    grid-template-rows: repeat(15, 40px);
+    background: #000;
+    border: 3px solid #FFD700;
+    position: relative;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.cell.floor { background: #1a1a1a; }
+.cell.wall { background: #444; }
+.cell.door { background: #654321; }
+.cell.chest { background: #8B4513; }
+.cell.stairs { background: #2a2a4a; }
+
+/* 엔티티 */
+.entity {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    transition: all 0.15s ease;
+    z-index: 10;
+}
+
+.entity.player {
+    z-index: 100;
+    filter: drop-shadow(0 0 8px #FFD700);
+    animation: playerIdle 1s ease-in-out infinite;
+}
+
+@keyframes playerIdle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.entity.enemy {
+    filter: drop-shadow(0 0 5px #ff4444);
+    animation: enemyFloat 2s ease-in-out infinite;
+}
+
+@keyframes enemyFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.entity.boss {
+    filter: drop-shadow(0 0 10px #ff00ff);
+    animation: bossGlow 1s ease-in-out infinite;
+    z-index: 90;
+    font-size: 36px;
+}
+
+@keyframes bossGlow {
+    0%, 100% { filter: drop-shadow(0 0 10px #ff00ff); }
+    50% { filter: drop-shadow(0 0 20px #ff00ff); }
+}
+
+/* 퀵슬롯 */
+.quick-slots {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.slot {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #666;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.slot:hover {
+    border-color: #FFD700;
+    transform: scale(1.05);
+}
+
+.slot-key {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 10px;
+    color: #FFD700;
+}
+
+.slot-icon {
+    font-size: 24px;
+}
+
+.slot-count {
+    position: absolute;
+    bottom: 3px;
+    right: 5px;
+    font-size: 10px;
+    color: #4ecdc4;
+}
+
+/* 사이드 패널 */
+.side-panel {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 메시지 로그 */
+.message-log {
+    background: #0a0a0a;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    padding: 15px;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 10px;
+    line-height: 1.8;
+}
+
+.message {
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.message.welcome { color: #FFD700; }
+.message.info { color: #4ecdc4; }
+.message.combat { color: #ff6b6b; }
+.message.loot { color: #f9ca24; }
+.message.boss { color: #ff00ff; font-size: 12px; }
+.message.success { color: #6ab04c; }
+
+/* 프롬프트 패널 */
+.prompt-panel {
+    background: #0a0a0a;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.prompt-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #FFD700;
+}
+
+.prompt-power {
+    color: #4ecdc4;
+}
+
+.prompt-section {
+    margin-bottom: 15px;
+}
+
+.prompt-section label {
+    display: block;
+    font-size: 10px;
+    color: #FFD700;
+    margin-bottom: 5px;
+}
+
+.prompt-section textarea {
+    width: 100%;
+    height: 60px;
+    background: #1a1a2e;
+    border: 2px solid #444;
+    color: white;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    border-radius: 5px;
+    resize: none;
+}
+
+.prompt-section textarea:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.prompt-hint {
+    font-size: 9px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.prompt-hint.good { color: #6ab04c; }
+.prompt-hint.bad { color: #ff6b6b; }
+
+.prompt-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.btn-cast {
+    flex: 1;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: none;
+    padding: 12px;
+    font-size: 12px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-cast:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.btn-cancel {
+    padding: 12px 20px;
+    background: #444;
+    color: white;
+    border: 2px solid #666;
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #555;
+}
+
+/* 프롬프트 팁 */
+.prompt-tips {
+    background: #1a1a2e;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 9px;
+}
+
+.tip-title {
+    color: #FFD700;
+    margin-bottom: 8px;
+}
+
+.prompt-tips ul {
+    list-style: none;
+    color: #999;
+}
+
+.prompt-tips li {
+    margin-bottom: 5px;
+    padding-left: 15px;
+    position: relative;
+}
+
+.prompt-tips li:before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #FFD700;
+}
+
+/* 보스 패널 */
+.boss-panel {
+    background: linear-gradient(135deg, #8B008B 0%, #4B0082 100%);
+    border: 3px solid #ff00ff;
+    border-radius: 10px;
+    padding: 15px;
+    animation: bossPulse 2s ease-in-out infinite;
+}
+
+@keyframes bossPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(255, 0, 255, 0.8); }
+}
+
+.boss-header {
+    font-size: 14px;
+    color: #FFD700;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.boss-name {
+    font-size: 16px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.boss-hp-bar {
+    width: 100%;
+    height: 25px;
+    background: #333;
+    border: 2px solid #ff00ff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff00ff, #ff69b4);
+    transition: width 0.5s ease;
+}
+
+.boss-weakness {
+    font-size: 10px;
+    color: #FFD700;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.boss-hint {
+    font-size: 9px;
+    color: #ddd;
+    text-align: center;
+    background: rgba(0,0,0,0.3);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+/* 도움말 패널 */
+.help-panel {
+    background: #0a0a0a;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.help-title {
+    font-size: 12px;
+    color: #FFD700;
+    margin-bottom: 10px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 8px;
+    font-size: 10px;
+}
+
+.control {
+    color: #4ecdc4;
+}
+
+/* 보스 오버레이 */
+.boss-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.boss-overlay.active {
+    display: flex;
+    animation: fadeIn 0.5s;
+}
+
+.boss-intro {
+    text-align: center;
+    animation: zoomIn 0.5s;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.boss-title {
+    font-size: 32px;
+    color: #FFD700;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+}
+
+.boss-sprite {
+    font-size: 120px;
+    margin: 20px 0;
+    animation: bossIntro 2s ease-in-out infinite;
+}
+
+@keyframes bossIntro {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+}
+
+.boss-description {
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 30px;
+    max-width: 500px;
+}
+
+.btn-fight {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #ff00ff 0%, #ff69b4 100%);
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.btn-fight:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+}
+
+/* 게임 오버 오버레이 */
+.game-over-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.game-over-overlay.active {
+    display: flex;
+}
+
+.game-over-content {
+    text-align: center;
+    animation: fadeIn 1s;
+}
+
+.game-over-content h1 {
+    font-size: 48px;
+    color: #ff6b6b;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+}
+
+.final-stats {
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 30px;
+    line-height: 2;
+}
+
+.final-stats div {
+    margin-bottom: 10px;
+}
+
+.btn-restart {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: none;
+    font-size: 14px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.btn-restart:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+}
+
+/* 레벨업 이펙트 */
+.levelup-effect {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: #FFD700;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+    display: none;
+    z-index: 500;
+}
+
+.levelup-effect.active {
+    display: block;
+    animation: levelupAnim 1.5s ease-out;
+}
+
+@keyframes levelupAnim {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* 데미지 텍스트 */
+.damage-text {
+    position: absolute;
+    font-size: 20px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 200;
+    animation: damageFloat 1s forwards;
+}
+
+.damage-text.player-damage {
+    color: #ff6b6b;
+}
+
+.damage-text.enemy-damage {
+    color: #FFD700;
+}
+
+.damage-text.heal {
+    color: #6ab04c;
+}
+
+.damage-text.critical {
+    color: #ff00ff;
+    font-size: 28px;
+}
+
+@keyframes damageFloat {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-40px);
+        opacity: 0;
+    }
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FFD700;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #FFA500;
+}
