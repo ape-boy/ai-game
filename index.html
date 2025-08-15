@@ -3,1181 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Dungeon - AI 던전 탐험</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-        
-        body {
-            font-family: 'VT323', monospace;
-            background: #0f0f0f;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-size: 18px;
-        }
-        
-        .game-wrapper {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        .game-container {
-            background: #1a1a1a;
-            border: 3px solid #444;
-            padding: 10px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-        }
-        
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #222;
-            margin-bottom: 10px;
-            border: 2px solid #333;
-        }
-        
-        .stat {
-            color: #0f0;
-        }
-        
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(15, 40px);
-            grid-template-rows: repeat(15, 40px);
-            gap: 0;
-            background: #000;
-            border: 2px solid #333;
-            position: relative;
-        }
-        
-        .cell {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            position: relative;
-            background: #111;
-            border: 1px solid #222;
-        }
-        
-        .cell.wall {
-            background: #444;
-            border-color: #555;
-        }
-        
-        .cell.floor {
-            background: #1a1a1a;
-        }
-        
-        .cell.explored {
-            background: #0a0a0a;
-        }
-        
-        .cell.door {
-            background: #442200;
-            border-color: #664400;
-        }
-        
-        .cell.chest {
-            background: #442244;
-            border-color: #663366;
-        }
-        
-        .entity {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            transition: all 0.15s ease;
-            z-index: 10;
-        }
-        
-        .entity.player {
-            z-index: 100;
-            filter: drop-shadow(0 0 5px #0f0);
-        }
-        
-        .entity.enemy {
-            filter: drop-shadow(0 0 5px #f00);
-        }
-        
-        .entity.npc {
-            filter: drop-shadow(0 0 5px #ff0);
-        }
-        
-        .entity.item {
-            animation: float 2s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .side-panel {
-            width: 350px;
-            background: #1a1a1a;
-            border: 3px solid #444;
-            padding: 15px;
-        }
-        
-        .message-log {
-            height: 200px;
-            background: #000;
-            border: 2px solid #333;
-            padding: 10px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            font-size: 16px;
-            line-height: 1.4;
-        }
-        
-        .message {
-            margin-bottom: 5px;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
-        }
-        
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-        
-        .message.combat { color: #ff6666; }
-        .message.loot { color: #ffff66; }
-        .message.system { color: #66ffff; }
-        .message.dialog { color: #ff66ff; }
-        .message.success { color: #66ff66; }
-        
-        .prompt-panel {
-            background: #000;
-            border: 2px solid #333;
-            padding: 10px;
-            display: none;
-        }
-        
-        .prompt-panel.active {
-            display: block;
-        }
-        
-        .prompt-input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #444;
-            color: #0f0;
-            padding: 8px;
-            font-family: 'VT323', monospace;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        
-        .prompt-input:focus {
-            outline: none;
-            border-color: #0f0;
-            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
-        }
-        
-        .prompt-button {
-            background: #003300;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-family: 'VT323', monospace;
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-        
-        .prompt-button:hover {
-            background: #005500;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-        
-        .inventory {
-            margin-top: 15px;
-            padding: 10px;
-            background: #000;
-            border: 2px solid #333;
-        }
-        
-        .inventory-title {
-            color: #0f0;
-            margin-bottom: 10px;
-        }
-        
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 50px);
-            gap: 5px;
-        }
-        
-        .inventory-slot {
-            width: 50px;
-            height: 50px;
-            background: #111;
-            border: 1px solid #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .inventory-slot:hover {
-            border-color: #0f0;
-        }
-        
-        .inventory-slot .count {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 12px;
-            color: #ff0;
-        }
-        
-        .controls {
-            margin-top: 15px;
-            padding: 10px;
-            background: #000;
-            border: 2px solid #333;
-            font-size: 16px;
-            line-height: 1.8;
-        }
-        
-        .controls-title {
-            color: #0f0;
-            margin-bottom: 5px;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .overlay.active {
-            display: flex;
-        }
-        
-        .dialog-box {
-            background: #1a1a1a;
-            border: 3px solid #0f0;
-            padding: 20px;
-            max-width: 500px;
-            animation: zoomIn 0.3s;
-        }
-        
-        @keyframes zoomIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .dialog-title {
-            color: #0f0;
-            font-size: 24px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .dialog-content {
-            color: #fff;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        
-        .dialog-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .fx {
-            position: absolute;
-            pointer-events: none;
-            z-index: 500;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .damage-text {
-            color: #ff0000;
-            animation: damageFloat 1s forwards;
-        }
-        
-        .heal-text {
-            color: #00ff00;
-            animation: damageFloat 1s forwards;
-        }
-        
-        @keyframes damageFloat {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-        }
-        
-        .shake {
-            animation: shake 0.3s;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-2px, 0); }
-            75% { transform: translate(2px, 0); }
-        }
-    </style>
+    <title>AI 던전 마스터 - 프롬프트로 전투하라!</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-wrapper">
+        <!-- 메인 게임 화면 -->
         <div class="game-container">
             <div class="game-header">
-                <div class="stat">층: <span id="floor">1</span></div>
-                <div class="stat">HP: <span id="hp">100</span>/<span id="maxHp">100</span></div>
-                <div class="stat">레벨: <span id="level">1</span></div>
-                <div class="stat">EXP: <span id="exp">0</span>/<span id="maxExp">100</span></div>
-                <div class="stat">프롬프트: <span id="prompts">3</span></div>
+                <div class="stat-group">
+                    <div class="stat">⚔️ <span id="attack">10</span></div>
+                    <div class="stat">🛡️ <span id="defense">5</span></div>
+                    <div class="stat">✨ <span id="magic">0</span></div>
+                </div>
+                <div class="floor-display">
+                    <span class="floor-text">FLOOR</span>
+                    <span class="floor-number" id="floor">1</span>
+                </div>
+                <div class="stat-group">
+                    <div class="stat">
+                        <span class="hp-label">HP</span>
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="hpBar"></div>
+                            <span class="hp-text"><span id="hp">100</span>/<span id="maxHp">100</span></span>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <span class="exp-label">EXP</span>
+                        <div class="exp-bar">
+                            <div class="exp-fill" id="expBar"></div>
+                            <span class="exp-text">Lv.<span id="level">1</span></span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="game-board" id="gameBoard">
-                <!-- 15x15 그리드가 여기에 생성됩니다 -->
+                <!-- 게임 보드가 여기에 생성됩니다 -->
+            </div>
+            
+            <div class="quick-slots">
+                <div class="slot" data-key="1">
+                    <span class="slot-key">1</span>
+                    <span class="slot-icon">🧪</span>
+                    <span class="slot-count" id="potion-count">3</span>
+                </div>
+                <div class="slot" data-key="2">
+                    <span class="slot-key">2</span>
+                    <span class="slot-icon">📜</span>
+                    <span class="slot-count" id="scroll-count">2</span>
+                </div>
+                <div class="slot" data-key="3">
+                    <span class="slot-key">3</span>
+                    <span class="slot-icon">⚡</span>
+                    <span class="slot-count" id="thunder-count">1</span>
+                </div>
+                <div class="slot" data-key="4">
+                    <span class="slot-key">4</span>
+                    <span class="slot-icon">❄️</span>
+                    <span class="slot-count" id="ice-count">1</span>
+                </div>
             </div>
         </div>
         
+        <!-- 사이드 패널 -->
         <div class="side-panel">
             <div class="message-log" id="messageLog">
-                <div class="message system">== Prompt Dungeon ==</div>
-                <div class="message">AI 던전에 오신 것을 환영합니다!</div>
-                <div class="message">프롬프트의 힘으로 몬스터를 물리치세요!</div>
+                <div class="message welcome">🎮 AI 던전 마스터에 오신 것을 환영합니다!</div>
+                <div class="message info">프롬프트의 품질이 마법의 위력을 결정합니다!</div>
             </div>
             
+            <!-- 프롬프트 패널 -->
             <div class="prompt-panel" id="promptPanel">
-                <div style="color: #0f0; margin-bottom: 10px;">💬 프롬프트 작성</div>
-                <input type="text" class="prompt-input" id="systemPrompt" 
-                    placeholder="System: AI의 역할 (예: 당신은 용감한 전사입니다)">
-                <input type="text" class="prompt-input" id="userPrompt" 
-                    placeholder="User: 명령 (예: 고블린을 공격하세요!)">
-                <div style="display: flex; gap: 10px;">
-                    <button class="prompt-button" onclick="submitPrompt()">전송</button>
-                    <button class="prompt-button" onclick="closePrompt()">취소</button>
+                <div class="prompt-header">
+                    <span>🤖 AI 프롬프트 마법</span>
+                    <span class="prompt-power">위력: <span id="promptPower">0</span>%</span>
+                </div>
+                
+                <div class="prompt-inputs">
+                    <div class="prompt-section">
+                        <label>System Prompt (AI의 역할 정의)</label>
+                        <textarea id="systemPrompt" placeholder="예: 당신은 고대의 마법사입니다. 강력한 주문을 사용할 수 있습니다."></textarea>
+                        <div class="prompt-hint" id="systemHint">💡 구체적이고 명확한 역할을 부여하세요</div>
+                    </div>
+                    
+                    <div class="prompt-section">
+                        <label>User Prompt (명령 내리기)</label>
+                        <textarea id="userPrompt" placeholder="예: 3단계로 나누어 화염 마법을 시전하고, 각 단계의 효과를 설명하세요."></textarea>
+                        <div class="prompt-hint" id="userHint">💡 구체적인 행동과 조건을 명시하세요</div>
+                    </div>
+                </div>
+                
+                <div class="prompt-buttons">
+                    <button class="btn-cast" onclick="castPromptSpell()">
+                        <span class="btn-icon">⚡</span>
+                        <span>마법 시전</span>
+                    </button>
+                    <button class="btn-cancel" onclick="closePrompt()">취소</button>
+                </div>
+                
+                <div class="prompt-tips">
+                    <div class="tip-title">🎯 프롬프트 팁</div>
+                    <ul>
+                        <li>구체적인 숫자와 단계를 명시하면 위력 UP!</li>
+                        <li>Chain-of-thought (단계별 사고) 사용시 보너스</li>
+                        <li>보스전에서는 특별한 키워드가 필요합니다</li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="inventory">
-                <div class="inventory-title">📦 인벤토리</div>
-                <div class="inventory-grid" id="inventoryGrid">
-                    <!-- 인벤토리 슬롯들 -->
+            <!-- 보스 정보 패널 -->
+            <div class="boss-panel" id="bossPanel" style="display: none;">
+                <div class="boss-header">⚠️ 보스 등장!</div>
+                <div class="boss-info">
+                    <div class="boss-name" id="bossName">???</div>
+                    <div class="boss-hp-bar">
+                        <div class="boss-hp-fill" id="bossHpBar"></div>
+                    </div>
+                    <div class="boss-weakness">
+                        약점: <span id="bossWeakness">???</span>
+                    </div>
+                    <div class="boss-hint" id="bossHint">
+                        프롬프트에 특정 키워드를 포함시켜보세요!
+                    </div>
                 </div>
             </div>
             
-            <div class="controls">
-                <div class="controls-title">🎮 조작법</div>
-                <div>⬆⬇⬅➡ / WASD : 이동</div>
-                <div>SPACE : 공격/대화</div>
-                <div>E : 아이템 사용</div>
-                <div>P : 프롬프트 작성</div>
-                <div>1-5 : 퀵슬롯 사용</div>
+            <!-- 도움말 -->
+            <div class="help-panel">
+                <div class="help-title">📖 조작법</div>
+                <div class="controls-grid">
+                    <div class="control">⬆⬇⬅➡</div><div>이동</div>
+                    <div class="control">SPACE</div><div>공격/대화</div>
+                    <div class="control">P</div><div>프롬프트 마법</div>
+                    <div class="control">1-4</div><div>아이템 사용</div>
+                    <div class="control">ESC</div><div>일시정지</div>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="overlay" id="overlay">
-        <div class="dialog-box" id="dialogBox">
-            <div class="dialog-title" id="dialogTitle">제목</div>
-            <div class="dialog-content" id="dialogContent">내용</div>
-            <div class="dialog-buttons" id="dialogButtons">
-                <button class="prompt-button" onclick="closeDialog()">확인</button>
-            </div>
+    <!-- 보스전 오버레이 -->
+    <div class="boss-overlay" id="bossOverlay">
+        <div class="boss-intro">
+            <div class="boss-title" id="bossTitle">보스 등장!</div>
+            <div class="boss-sprite" id="bossSprite">🐉</div>
+            <div class="boss-description" id="bossDescription"></div>
+            <button class="btn-fight" onclick="startBossFight()">전투 시작!</button>
         </div>
     </div>
     
-    <script>
-        // 게임 상태
-        const GRID_SIZE = 15;
-        const CELL_SIZE = 40;
-        
-        const game = {
-            floor: 1,
-            player: {
-                x: 7,
-                y: 7,
-                hp: 100,
-                maxHp: 100,
-                level: 1,
-                exp: 0,
-                maxExp: 100,
-                prompts: 3,
-                attack: 10,
-                defense: 5
-            },
-            map: [],
-            entities: [],
-            inventory: [
-                { icon: '🧪', name: '체력 포션', count: 3, type: 'potion' },
-                { icon: '📜', name: '프롬프트 스크롤', count: 2, type: 'scroll' }
-            ],
-            turn: 0,
-            isMoving: false,
-            currentTarget: null
-        };
-        
-        // 맵 타일 타입
-        const TILES = {
-            FLOOR: 0,
-            WALL: 1,
-            DOOR: 2,
-            CHEST: 3,
-            STAIRS: 4
-        };
-        
-        // 엔티티 타입
-        const ENTITIES = {
-            GOBLIN: { icon: '👺', name: '고블린', hp: 30, attack: 5, exp: 20 },
-            SLIME: { icon: '🟢', name: '슬라임', hp: 20, attack: 3, exp: 10 },
-            SKELETON: { icon: '💀', name: '스켈레톤', hp: 40, attack: 8, exp: 30 },
-            WIZARD: { icon: '🧙', name: '마법사', hp: 50, attack: 12, exp: 50 },
-            NPC: { icon: '🤖', name: 'AI 도우미', type: 'npc' },
-            MERCHANT: { icon: '🏪', name: '상인', type: 'npc' }
-        };
-        
-        // 맵 생성
-        function generateMap() {
-            // 맵 초기화 (모두 벽으로)
-            game.map = [];
-            for (let y = 0; y < GRID_SIZE; y++) {
-                game.map[y] = [];
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    game.map[y][x] = TILES.WALL;
-                }
-            }
-            
-            // 방 생성
-            const rooms = [];
-            const numRooms = 5 + Math.floor(Math.random() * 3);
-            
-            for (let i = 0; i < numRooms; i++) {
-                const room = {
-                    x: 1 + Math.floor(Math.random() * (GRID_SIZE - 6)),
-                    y: 1 + Math.floor(Math.random() * (GRID_SIZE - 6)),
-                    w: 3 + Math.floor(Math.random() * 4),
-                    h: 3 + Math.floor(Math.random() * 4)
-                };
-                
-                // 방 그리기
-                for (let y = room.y; y < room.y + room.h && y < GRID_SIZE - 1; y++) {
-                    for (let x = room.x; x < room.x + room.w && x < GRID_SIZE - 1; x++) {
-                        game.map[y][x] = TILES.FLOOR;
-                    }
-                }
-                
-                rooms.push(room);
-            }
-            
-            // 방 연결 (간단한 복도)
-            for (let i = 0; i < rooms.length - 1; i++) {
-                const r1 = rooms[i];
-                const r2 = rooms[i + 1];
-                const x1 = Math.floor(r1.x + r1.w / 2);
-                const y1 = Math.floor(r1.y + r1.h / 2);
-                const x2 = Math.floor(r2.x + r2.w / 2);
-                const y2 = Math.floor(r2.y + r2.h / 2);
-                
-                // 수평 복도
-                for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
-                    game.map[y1][x] = TILES.FLOOR;
-                }
-                
-                // 수직 복도
-                for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
-                    game.map[y][x2] = TILES.FLOOR;
-                }
-            }
-            
-            // 플레이어 시작 위치
-            const startRoom = rooms[0];
-            game.player.x = Math.floor(startRoom.x + startRoom.w / 2);
-            game.player.y = Math.floor(startRoom.y + startRoom.h / 2);
-            
-            // 계단 배치 (마지막 방)
-            const endRoom = rooms[rooms.length - 1];
-            const stairX = Math.floor(endRoom.x + endRoom.w / 2);
-            const stairY = Math.floor(endRoom.y + endRoom.h / 2);
-            game.map[stairY][stairX] = TILES.STAIRS;
-            
-            // 보물상자 배치
-            if (Math.random() < 0.6) {
-                const chestRoom = rooms[Math.floor(Math.random() * rooms.length)];
-                const chestX = Math.floor(chestRoom.x + Math.random() * chestRoom.w);
-                const chestY = Math.floor(chestRoom.y + Math.random() * chestRoom.h);
-                if (game.map[chestY] && game.map[chestY][chestX] === TILES.FLOOR) {
-                    game.map[chestY][chestX] = TILES.CHEST;
-                }
-            }
-            
-            // 엔티티 배치
-            game.entities = [];
-            
-            // 몬스터 배치
-            const monsterCount = 3 + Math.floor(game.floor / 2);
-            for (let i = 0; i < monsterCount; i++) {
-                const room = rooms[1 + Math.floor(Math.random() * (rooms.length - 1))];
-                const x = Math.floor(room.x + Math.random() * room.w);
-                const y = Math.floor(room.y + Math.random() * room.h);
-                
-                if (game.map[y] && game.map[y][x] === TILES.FLOOR) {
-                    const monsterTypes = [ENTITIES.GOBLIN, ENTITIES.SLIME, ENTITIES.SKELETON];
-                    if (game.floor > 3) monsterTypes.push(ENTITIES.WIZARD);
-                    
-                    const monsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
-                    game.entities.push({
-                        x: x,
-                        y: y,
-                        ...JSON.parse(JSON.stringify(monsterType)),
-                        maxHp: monsterType.hp,
-                        type: 'enemy'
-                    });
-                }
-            }
-            
-            // NPC 배치
-            if (Math.random() < 0.5) {
-                const room = rooms[Math.floor(Math.random() * rooms.length)];
-                const x = Math.floor(room.x + Math.random() * room.w);
-                const y = Math.floor(room.y + Math.random() * room.h);
-                
-                if (game.map[y] && game.map[y][x] === TILES.FLOOR) {
-                    const npcType = Math.random() < 0.5 ? ENTITIES.NPC : ENTITIES.MERCHANT;
-                    game.entities.push({
-                        x: x,
-                        y: y,
-                        ...npcType,
-                        type: 'npc'
-                    });
-                }
-            }
-        }
-        
-        // 맵 렌더링
-        function renderMap() {
-            const board = document.getElementById('gameBoard');
-            board.innerHTML = '';
-            
-            // 타일 렌더링
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    
-                    switch(game.map[y][x]) {
-                        case TILES.WALL:
-                            cell.classList.add('wall');
-                            break;
-                        case TILES.FLOOR:
-                            cell.classList.add('floor');
-                            break;
-                        case TILES.DOOR:
-                            cell.classList.add('door');
-                            cell.textContent = '🚪';
-                            break;
-                        case TILES.CHEST:
-                            cell.classList.add('chest');
-                            cell.textContent = '📦';
-                            break;
-                        case TILES.STAIRS:
-                            cell.classList.add('floor');
-                            cell.textContent = '🔽';
-                            break;
-                    }
-                    
-                    board.appendChild(cell);
-                }
-            }
-            
-            // 플레이어 렌더링
-            const player = document.createElement('div');
-            player.className = 'entity player';
-            player.id = 'player';
-            player.style.left = game.player.x * CELL_SIZE + 'px';
-            player.style.top = game.player.y * CELL_SIZE + 'px';
-            player.textContent = '🧙';
-            board.appendChild(player);
-            
-            // 엔티티 렌더링
-            game.entities.forEach((entity, index) => {
-                const el = document.createElement('div');
-                el.className = `entity ${entity.type}`;
-                el.id = `entity-${index}`;
-                el.style.left = entity.x * CELL_SIZE + 'px';
-                el.style.top = entity.y * CELL_SIZE + 'px';
-                el.textContent = entity.icon;
-                board.appendChild(el);
-            });
-        }
-        
-        // 플레이어 이동
-        function movePlayer(dx, dy) {
-            if (game.isMoving) return;
-            
-            const newX = game.player.x + dx;
-            const newY = game.player.y + dy;
-            
-            // 경계 체크
-            if (newX < 0 || newX >= GRID_SIZE || newY < 0 || newY >= GRID_SIZE) {
-                return;
-            }
-            
-            // 벽 체크
-            if (game.map[newY][newX] === TILES.WALL) {
-                return;
-            }
-            
-            // 엔티티 체크
-            const entity = game.entities.find(e => e.x === newX && e.y === newY);
-            if (entity) {
-                if (entity.type === 'enemy') {
-                    combat(entity);
-                } else if (entity.type === 'npc') {
-                    interactNPC(entity);
-                }
-                return;
-            }
-            
-            // 이동
-            game.isMoving = true;
-            game.player.x = newX;
-            game.player.y = newY;
-            
-            const playerEl = document.getElementById('player');
-            playerEl.style.left = newX * CELL_SIZE + 'px';
-            playerEl.style.top = newY * CELL_SIZE + 'px';
-            
-            // 타일 상호작용
-            const tile = game.map[newY][newX];
-            if (tile === TILES.CHEST) {
-                openChest(newX, newY);
-            } else if (tile === TILES.STAIRS) {
-                nextFloor();
-            }
-            
-            // 몬스터 턴
-            setTimeout(() => {
-                moveMonsters();
-                game.isMoving = false;
-            }, 150);
-        }
-        
-        // 전투
-        function combat(enemy) {
-            const damage = Math.max(1, game.player.attack - Math.floor(Math.random() * 5));
-            enemy.hp -= damage;
-            
-            showDamage(enemy.x, enemy.y, damage);
-            addMessage(`${enemy.name}에게 ${damage} 데미지!`, 'combat');
-            
-            if (enemy.hp <= 0) {
-                // 적 처치
-                const index = game.entities.indexOf(enemy);
-                game.entities.splice(index, 1);
-                document.getElementById(`entity-${index}`).remove();
-                
-                // 경험치 획득
-                game.player.exp += enemy.exp;
-                addMessage(`${enemy.name}을 처치! +${enemy.exp} EXP`, 'success');
-                
-                // 레벨업 체크
-                if (game.player.exp >= game.player.maxExp) {
-                    levelUp();
-                }
-                
-                // 아이템 드롭
-                if (Math.random() < 0.3) {
-                    dropItem(enemy.x, enemy.y);
-                }
-            } else {
-                // 반격
-                const enemyDamage = Math.max(1, enemy.attack - Math.floor(Math.random() * 3));
-                game.player.hp -= enemyDamage;
-                
-                showDamage(game.player.x, game.player.y, enemyDamage, true);
-                addMessage(`${enemy.name}의 반격! -${enemyDamage} HP`, 'combat');
-                
-                if (game.player.hp <= 0) {
-                    gameOver();
-                }
-            }
-            
-            updateStats();
-        }
-        
-        // 몬스터 이동
-        function moveMonsters() {
-            game.entities.forEach((entity, index) => {
-                if (entity.type !== 'enemy') return;
-                
-                const dx = game.player.x - entity.x;
-                const dy = game.player.y - entity.y;
-                const distance = Math.abs(dx) + Math.abs(dy);
-                
-                // 플레이어가 가까우면 추적
-                if (distance <= 5) {
-                    let moveX = 0, moveY = 0;
-                    
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        moveX = dx > 0 ? 1 : -1;
-                    } else {
-                        moveY = dy > 0 ? 1 : -1;
-                    }
-                    
-                    const newX = entity.x + moveX;
-                    const newY = entity.y + moveY;
-                    
-                    // 이동 가능 체크
-                    if (game.map[newY] && game.map[newY][newX] === TILES.FLOOR) {
-                        // 다른 엔티티 체크
-                        const blocked = game.entities.some(e => 
-                            e !== entity && e.x === newX && e.y === newY
-                        );
-                        
-                        if (!blocked) {
-                            // 플레이어 공격
-                            if (newX === game.player.x && newY === game.player.y) {
-                                const damage = Math.max(1, entity.attack - Math.floor(Math.random() * 3));
-                                game.player.hp -= damage;
-                                
-                                showDamage(game.player.x, game.player.y, damage, true);
-                                addMessage(`${entity.name}의 공격! -${damage} HP`, 'combat');
-                                
-                                if (game.player.hp <= 0) {
-                                    gameOver();
-                                }
-                                updateStats();
-                            } else {
-                                // 이동
-                                entity.x = newX;
-                                entity.y = newY;
-                                
-                                const el = document.getElementById(`entity-${index}`);
-                                if (el) {
-                                    el.style.left = newX * CELL_SIZE + 'px';
-                                    el.style.top = newY * CELL_SIZE + 'px';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // NPC 상호작용
-        function interactNPC(npc) {
-            if (npc.name === 'AI 도우미') {
-                showDialog(
-                    '🤖 AI 도우미',
-                    '안녕하세요! 프롬프트를 작성하면 강력한 마법을 사용할 수 있어요.<br><br>' +
-                    'System Prompt로 AI의 역할을 정하고,<br>' +
-                    'User Prompt로 명령을 내려보세요!<br><br>' +
-                    '프롬프트 스크롤을 드릴게요! (+1 프롬프트)'
-                );
-                game.player.prompts++;
-                updateStats();
-            } else if (npc.name === '상인') {
-                showDialog(
-                    '🏪 상인',
-                    '물건을 사고 싶으신가요?<br><br>' +
-                    '체력 포션: 체력을 30 회복합니다.<br>' +
-                    '프롬프트 스크롤: 프롬프트 사용 횟수를 늘립니다.<br><br>' +
-                    '무료 샘플을 드릴게요!'
-                );
-                game.inventory[0].count++;
-                updateInventory();
-            }
-        }
-        
-        // 상자 열기
-        function openChest(x, y) {
-            game.map[y][x] = TILES.FLOOR;
-            
-            const loot = Math.random();
-            if (loot < 0.3) {
-                game.inventory[0].count += 2;
-                addMessage('체력 포션 x2 획득!', 'loot');
-            } else if (loot < 0.6) {
-                game.inventory[1].count++;
-                game.player.prompts++;
-                addMessage('프롬프트 스크롤 획득!', 'loot');
-            } else {
-                game.player.maxHp += 10;
-                game.player.hp += 10;
-                addMessage('최대 체력 +10!', 'loot');
-            }
-            
-            updateStats();
-            updateInventory();
-            renderMap();
-        }
-        
-        // 다음 층
-        function nextFloor() {
-            game.floor++;
-            addMessage(`=== ${game.floor}층 도착 ===`, 'system');
-            game.player.hp = Math.min(game.player.maxHp, game.player.hp + 20);
-            game.player.prompts++;
-            generateMap();
-            renderMap();
-            updateStats();
-        }
-        
-        // 레벨업
-        function levelUp() {
-            game.player.level++;
-            game.player.exp = 0;
-            game.player.maxExp = game.player.level * 100;
-            game.player.maxHp += 20;
-            game.player.hp = game.player.maxHp;
-            game.player.attack += 5;
-            game.player.defense += 2;
-            game.player.prompts += 2;
-            
-            addMessage(`🎉 레벨업! Level ${game.player.level}`, 'success');
-            showDialog('레벨업!', `레벨 ${game.player.level} 달성!<br><br>모든 능력치가 상승했습니다!`);
-            
-            updateStats();
-        }
-        
-        // 프롬프트 열기
-        function openPrompt() {
-            if (game.player.prompts <= 0) {
-                addMessage('프롬프트 사용 횟수가 없습니다!', 'combat');
-                return;
-            }
-            
-            document.getElementById('promptPanel').classList.add('active');
-        }
-        
-        // 프롬프트 제출
-        async function submitPrompt() {
-            const systemPrompt = document.getElementById('systemPrompt').value;
-            const userPrompt = document.getElementById('userPrompt').value;
-            
-            if (!systemPrompt || !userPrompt) {
-                addMessage('프롬프트를 모두 입력하세요!', 'combat');
-                return;
-            }
-            
-            game.player.prompts--;
-            closePrompt();
-            
-            // API 호출 시뮬레이션
-            addMessage('프롬프트 시전 중...', 'system');
-            
-            setTimeout(() => {
-                // 프롬프트 효과
-                const effects = [
-                    { msg: '⚡ 번개 마법 시전! 모든 적에게 20 데미지!', damage: 20 },
-                    { msg: '❄️ 얼음 폭풍! 모든 적 동결!', freeze: true },
-                    { msg: '🔥 화염 폭발! 범위 30 데미지!', damage: 30 },
-                    { msg: '💚 치유의 빛! 체력 완전 회복!', heal: true }
-                ];
-                
-                const effect = effects[Math.floor(Math.random() * effects.length)];
-                addMessage(effect.msg, 'success');
-                
-                if (effect.damage) {
-                    // 모든 적에게 데미지
-                    game.entities.filter(e => e.type === 'enemy').forEach(enemy => {
-                        enemy.hp -= effect.damage;
-                        showDamage(enemy.x, enemy.y, effect.damage);
-                        
-                        if (enemy.hp <= 0) {
-                            const index = game.entities.indexOf(enemy);
-                            game.entities.splice(index, 1);
-                            const el = document.getElementById(`entity-${index}`);
-                            if (el) el.remove();
-                            game.player.exp += enemy.exp;
-                        }
-                    });
-                }
-                
-                if (effect.heal) {
-                    game.player.hp = game.player.maxHp;
-                    showDamage(game.player.x, game.player.y, '+MAX', false);
-                }
-                
-                updateStats();
-                
-                // 레벨업 체크
-                if (game.player.exp >= game.player.maxExp) {
-                    levelUp();
-                }
-            }, 1000);
-            
-            updateStats();
-        }
-        
-        // 프롬프트 닫기
-        function closePrompt() {
-            document.getElementById('promptPanel').classList.remove('active');
-            document.getElementById('systemPrompt').value = '';
-            document.getElementById('userPrompt').value = '';
-        }
-        
-        // 아이템 사용
-        function useItem(index) {
-            const item = game.inventory[index];
-            if (!item || item.count <= 0) return;
-            
-            if (item.type === 'potion') {
-                if (game.player.hp >= game.player.maxHp) {
-                    addMessage('체력이 이미 최대입니다!', 'system');
-                    return;
-                }
-                
-                game.player.hp = Math.min(game.player.maxHp, game.player.hp + 30);
-                item.count--;
-                addMessage('체력 포션 사용! +30 HP', 'success');
-                showDamage(game.player.x, game.player.y, '+30', false);
-            } else if (item.type === 'scroll') {
-                game.player.prompts++;
-                item.count--;
-                addMessage('프롬프트 스크롤 사용! +1 프롬프트', 'success');
-            }
-            
-            updateStats();
-            updateInventory();
-        }
-        
-        // 아이템 드롭
-        function dropItem(x, y) {
-            const items = [
-                { icon: '🧪', name: '체력 포션' },
-                { icon: '📜', name: '프롬프트 스크롤' },
-                { icon: '💎', name: '보석' }
-            ];
-            
-            const item = items[Math.floor(Math.random() * items.length)];
-            addMessage(`${item.name} 드롭!`, 'loot');
-            
-            // 인벤토리에 추가
-            if (item.name === '체력 포션') {
-                game.inventory[0].count++;
-            } else if (item.name === '프롬프트 스크롤') {
-                game.inventory[1].count++;
-                game.player.prompts++;
-            }
-            
-            updateInventory();
-        }
-        
-        // 데미지 표시
-        function showDamage(x, y, damage, isPlayer = false) {
-            const board = document.getElementById('gameBoard');
-            const fx = document.createElement('div');
-            fx.className = isPlayer ? 'fx damage-text shake' : 'fx heal-text';
-            fx.textContent = typeof damage === 'string' ? damage : `-${damage}`;
-            fx.style.left = x * CELL_SIZE + 10 + 'px';
-            fx.style.top = y * CELL_SIZE - 10 + 'px';
-            
-            board.appendChild(fx);
-            
-            if (isPlayer) {
-                document.getElementById('player').classList.add('shake');
-                setTimeout(() => {
-                    document.getElementById('player').classList.remove('shake');
-                }, 300);
-            }
-            
-            setTimeout(() => fx.remove(), 1000);
-        }
-        
-        // 메시지 추가
-        function addMessage(text, type = '') {
-            const log = document.getElementById('messageLog');
-            const message = document.createElement('div');
-            message.className = `message ${type}`;
-            message.textContent = text;
-            log.appendChild(message);
-            log.scrollTop = log.scrollHeight;
-            
-            // 오래된 메시지 삭제
-            if (log.children.length > 50) {
-                log.removeChild(log.children[0]);
-            }
-        }
-        
-        // 다이얼로그 표시
-        function showDialog(title, content) {
-            document.getElementById('dialogTitle').textContent = title;
-            document.getElementById('dialogContent').innerHTML = content;
-            document.getElementById('overlay').classList.add('active');
-        }
-        
-        // 다이얼로그 닫기
-        function closeDialog() {
-            document.getElementById('overlay').classList.remove('active');
-        }
-        
-        // 게임 오버
-        function gameOver() {
-            showDialog(
-                '게임 오버',
-                `${game.floor}층에서 쓰러졌습니다...<br><br>` +
-                `최종 레벨: ${game.player.level}<br>` +
-                `처치한 몬스터: ${game.turn}<br><br>` +
-                `F5를 눌러 다시 시작하세요!`
-            );
-        }
-        
-        // 스탯 업데이트
-        function updateStats() {
-            document.getElementById('floor').textContent = game.floor;
-            document.getElementById('hp').textContent = Math.max(0, game.player.hp);
-            document.getElementById('maxHp').textContent = game.player.maxHp;
-            document.getElementById('level').textContent = game.player.level;
-            document.getElementById('exp').textContent = game.player.exp;
-            document.getElementById('maxExp').textContent = game.player.maxExp;
-            document.getElementById('prompts').textContent = game.player.prompts;
-        }
-        
-        // 인벤토리 업데이트
-        function updateInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
-            
-            for (let i = 0; i < 10; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'inventory-slot';
-                
-                if (game.inventory[i]) {
-                    slot.textContent = game.inventory[i].icon;
-                    if (game.inventory[i].count > 1) {
-                        const count = document.createElement('span');
-                        count.className = 'count';
-                        count.textContent = game.inventory[i].count;
-                        slot.appendChild(count);
-                    }
-                    slot.onclick = () => useItem(i);
-                }
-                
-                grid.appendChild(slot);
-            }
-        }
-        
-        // 키보드 이벤트
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('promptPanel').classList.contains('active')) {
-                if (e.key === 'Escape') {
-                    closePrompt();
-                }
-                return;
-            }
-            
-            if (document.getElementById('overlay').classList.contains('active')) {
-                if (e.key === 'Escape' || e.key === 'Enter') {
-                    closeDialog();
-                }
-                return;
-            }
-            
-            switch(e.key) {
-                case 'ArrowUp':
-                case 'w':
-                case 'W':
-                    e.preventDefault();
-                    movePlayer(0, -1);
-                    break;
-                case 'ArrowDown':
-                case 's':
-                case 'S':
-                    e.preventDefault();
-                    movePlayer(0, 1);
-                    break;
-                case 'ArrowLeft':
-                case 'a':
-                case 'A':
-                    e.preventDefault();
-                    movePlayer(-1, 0);
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                case 'D':
-                    e.preventDefault();
-                    movePlayer(1, 0);
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    // 주변 적 공격
-                    const adjacent = game.entities.find(e => 
-                        e.type === 'enemy' &&
-                        Math.abs(e.x - game.player.x) <= 1 &&
-                        Math.abs(e.y - game.player.y) <= 1
-                    );
-                    if (adjacent) {
-                        combat(adjacent);
-                    }
-                    break;
-                case 'p':
-                case 'P':
-                    openPrompt();
-                    break;
-                case 'e':
-                case 'E':
-                    useItem(0); // 첫 번째 아이템 사용
-                    break;
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                    useItem(parseInt(e.key) - 1);
-                    break;
-            }
-        });
-        
-        // 게임 초기화
-        function init() {
-            generateMap();
-            renderMap();
-            updateStats();
-            updateInventory();
-            
-            addMessage('방향키로 이동, SPACE로 공격!', 'system');
-            addMessage('P키로 프롬프트 마법을 사용하세요!', 'system');
-        }
-        
-        // 게임 시작
-        init();
-    </script>
+    <!-- 게임 오버 오버레이 -->
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-content">
+            <h1>GAME OVER</h1>
+            <div class="final-stats">
+                <div>최종 층: <span id="finalFloor">1</span>층</div>
+                <div>최종 레벨: <span id="finalLevel">1</span></div>
+                <div>처치한 몬스터: <span id="finalKills">0</span></div>
+                <div>최고 프롬프트 점수: <span id="finalPromptScore">0</span>%</div>
+            </div>
+            <button class="btn-restart" onclick="location.reload()">다시 시작</button>
+        </div>
+    </div>
+    
+    <!-- 레벨업 이펙트 -->
+    <div class="levelup-effect" id="levelupEffect">
+        LEVEL UP!
+    </div>
+    
+    <script src="game.js"></script>
+    <script src="prompt-evaluator.js"></script>
+    <script src="boss.js"></script>
 </body>
 </html>
