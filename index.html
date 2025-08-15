@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Prompt Crossing — GitHub Pages Static</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#11172d;
+    --ink:#e6ebff;
+    --ink-dim:#b8c1ff;
+    --accent:#7aa2ff;
+    --ok:#3ccf4e;
+    --warn:#ffce4a;
+    --bad:#ff6b6b;
+    --muted:#303a66;
+    --card:#0f1630;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1020,#0d1330 40%,#0f1538);
+    color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple SD Gothic Neo, Noto Sans KR, "맑은 고딕", sans-serif;
+  }
+  header{
+    position:sticky; top:0; z-index:50; backdrop-filter: blur(8px);
+    background: rgba(10,15,35,.7); border-bottom: 1px solid #1c2550;
+  }
+  .bar{
+    max-width:1080px; margin:0 auto; padding:12px 16px; display:flex; gap:12px; align-items:center;
+  }
+  .logo{font-weight:800; letter-spacing:.2px}
+  .pill{
+    background:#0c1330; border:1px solid #22306a; color:var(--ink);
+    padding:6px 10px; border-radius:999px; font-size:12px
+  }
+  main{max-width:1080px; margin:0 auto; padding:24px 16px; display:grid; gap:16px}
+  .grid{display:grid; grid-template-columns: 320px 1fr; gap:16px}
+  .panel{
+    background:var(--panel); border:1px solid #1c2550; border-radius:16px; padding:16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .panel h2, .panel h3{margin:0 0 8px 0}
+  .muted{color:var(--ink-dim); font-size:13px}
+  .npc-list{display:grid; gap:8px}
+  .npc{
+    display:flex; gap:10px; align-items:center; padding:10px; border-radius:12px; cursor:pointer;
+    background:var(--card); border:1px solid #1a2350;
+  }
+  .npc.active{outline:2px solid var(--accent)}
+  .npc .emoji{font-size:18px}
+  .quests{display:grid; gap:10px}
+  .quest{
+    background:var(--card); border:1px solid #1a2350; border-radius:12px; padding:12px; cursor:pointer
+  }
+  .quest.active{outline:2px solid var(--accent)}
+  textarea,input,select,button{
+    font:inherit; color:inherit
+  }
+  textarea{
+    width:100%; min-height:120px; background:#0c1330; border:1px solid #22306a; color:var(--ink);
+    border-radius:12px; padding:10px; resize:vertical
+  }
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .grow{flex:1 1 auto}
+  button{
+    background:linear-gradient(180deg,#2745c7,#1f35a1); border:1px solid #2e49b6; color:#fff;
+    padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700;
+    box-shadow: 0 6px 18px rgba(58,98,255,.3);
+  }
+  button.secondary{
+    background:#0c1330; border:1px solid #22306a; font-weight:600; box-shadow:none
+  }
+  button.ghost{
+    background:transparent; border:1px dashed #2b3a77; color:var(--ink-dim)
+  }
+  pre{
+    background:#0c1330; border:1px solid #22306a; color:#dfe5ff;
+    border-radius:12px; padding:12px; white-space:pre-wrap; word-break:break-word; margin:0
+  }
+  .score-box{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .badge{display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid #
