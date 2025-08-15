@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 던전 마스터 - 프롬프트로 전투하라!</title>
+    <title>마법소년 김씨의 던전 어드벤처</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,9 +12,9 @@
         <div class="game-container">
             <div class="game-header">
                 <div class="stat-group">
-                    <div class="stat">⚔️ <span id="attack">10</span></div>
-                    <div class="stat">🛡️ <span id="defense">5</span></div>
-                    <div class="stat">✨ <span id="magic">0</span></div>
+                    <div class="stat">⚔️ <span id="attack">8</span></div>
+                    <div class="stat">🛡️ <span id="defense">3</span></div>
+                    <div class="stat">📚 <span id="magic">0</span></div>
                 </div>
                 <div class="floor-display">
                     <span class="floor-text">FLOOR</span>
@@ -25,7 +25,7 @@
                         <span class="hp-label">HP</span>
                         <div class="hp-bar">
                             <div class="hp-fill" id="hpBar"></div>
-                            <span class="hp-text"><span id="hp">100</span>/<span id="maxHp">100</span></span>
+                            <span class="hp-text"><span id="hp">80</span>/<span id="maxHp">80</span></span>
                         </div>
                     </div>
                     <div class="stat">
@@ -35,6 +35,13 @@
                             <span class="exp-text">Lv.<span id="level">1</span></span>
                         </div>
                     </div>
+                    <div class="stat">
+                        <span class="mana-label">MP</span>
+                        <div class="mana-bar">
+                            <div class="mana-fill" id="manaBar"></div>
+                            <span class="mana-text"><span id="mana">50</span>/<span id="maxMana">50</span></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -42,26 +49,31 @@
                 <!-- 게임 보드가 여기에 생성됩니다 -->
             </div>
             
-            <div class="quick-slots">
-                <div class="slot" data-key="1">
-                    <span class="slot-key">1</span>
-                    <span class="slot-icon">🧪</span>
-                    <span class="slot-count" id="potion-count">3</span>
-                </div>
-                <div class="slot" data-key="2">
-                    <span class="slot-key">2</span>
-                    <span class="slot-icon">📜</span>
-                    <span class="slot-count" id="scroll-count">2</span>
-                </div>
-                <div class="slot" data-key="3">
-                    <span class="slot-key">3</span>
-                    <span class="slot-icon">⚡</span>
-                    <span class="slot-count" id="thunder-count">1</span>
-                </div>
-                <div class="slot" data-key="4">
-                    <span class="slot-key">4</span>
-                    <span class="slot-icon">❄️</span>
-                    <span class="slot-count" id="ice-count">1</span>
+            <div class="game-controls">
+                <div class="control-guide">
+                    <h3>🎮 조작법</h3>
+                    <div class="controls-list">
+                        <div class="control-item">
+                            <span class="key">WASD / ↑↓←→</span>
+                            <span class="desc">이동</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">T</span>
+                            <span class="desc">탐험/전투 모드</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">SPACE</span>
+                            <span class="desc">선택/행동</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">F</span>
+                            <span class="desc">보스 필살기</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">1,2,3,4</span>
+                            <span class="desc">전투 선택</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,112 +81,111 @@
         <!-- 사이드 패널 -->
         <div class="side-panel">
             <div class="message-log" id="messageLog">
-                <div class="message welcome">🎮 AI 던전 마스터에 오신 것을 환영합니다!</div>
-                <div class="message info">프롬프트의 품질이 마법의 위력을 결정합니다!</div>
+                <div class="message welcome">🎮 마법소년 김씨의 던전 어드벤처!</div>
+                <div class="message info">객관식 전투로 몬스터를 물리치세요!</div>
             </div>
             
-            <!-- 프롬프트 패널 -->
-            <div class="prompt-panel" id="promptPanel">
-                <div class="prompt-header">
-                    <span>🤖 AI 프롬프트 마법</span>
-                    <span class="prompt-power">위력: <span id="promptPower">0</span>%</span>
+            <!-- 객관식 전투 패널 -->
+            <div class="battle-panel" id="battlePanel" style="display: none;">
+                <div class="battle-header">
+                    <span id="battleTitle">⚔️ 전투 선택</span>
+                    <span class="battle-timer">⏰ <span id="battleTimer">15</span>초</span>
                 </div>
                 
-                <div class="prompt-inputs">
-                    <div class="prompt-section">
-                        <label>System Prompt (AI의 역할 정의)</label>
-                        <textarea id="systemPrompt" placeholder="예: 당신은 고대의 마법사입니다. 강력한 주문을 사용할 수 있습니다."></textarea>
-                        <div class="prompt-hint" id="systemHint">💡 구체적이고 명확한 역할을 부여하세요</div>
+                <div class="battle-question" id="battleQuestion">
+                    <h3 id="questionText">슬라임의 가장 효과적인 공격 방법은?</h3>
+                    <div class="battle-choices">
+                        <div class="choice" data-key="1">
+                            <span class="choice-key">1</span>
+                            <span class="choice-text">강력한 물리 공격</span>
+                            <span class="choice-result"></span>
+                        </div>
+                        <div class="choice" data-key="2">
+                            <span class="choice-key">2</span>
+                            <span class="choice-text">화염 마법으로 건조</span>
+                            <span class="choice-result"></span>
+                        </div>
+                        <div class="choice" data-key="3">
+                            <span class="choice-key">3</span>
+                            <span class="choice-text">얼음 마법으로 냉각</span>
+                            <span class="choice-result"></span>
+                        </div>
+                        <div class="choice" data-key="4">
+                            <span class="choice-key">4</span>
+                            <span class="choice-text">바람 마법으로 밀어내기</span>
+                            <span class="choice-result"></span>
+                        </div>
                     </div>
-                    
-                    <div class="prompt-section">
-                        <label>User Prompt (명령 내리기)</label>
-                        <textarea id="userPrompt" placeholder="예: 3단계로 나누어 화염 마법을 시전하고, 각 단계의 효과를 설명하세요."></textarea>
-                        <div class="prompt-hint" id="userHint">💡 구체적인 행동과 조건을 명시하세요</div>
+                    <div class="battle-hint" id="battleHint">💡 몬스터의 특성을 고려해보세요!</div>
+                </div>
+            </div>
+            
+            <!-- 필살기 패널 (보스전 전용) -->
+            <div class="ultimate-panel" id="ultimatePanel" style="display: none;">
+                <div class="ultimate-header">
+                    <span>✨ 최강 마법 주문</span>
+                    <span class="ultimate-power">힌트북: <span id="hintBookCount">0</span>권</span>
+                </div>
+                
+                <div class="ultimate-inputs">
+                    <div class="ultimate-section">
+                        <label>최강 마법 주문 입력</label>
+                        <textarea id="ultimatePrompt" rows="4" placeholder="예: 슬라임의 물로 된 체질을 이용해 고온 열에너지로 순간 증발시키고, 마리기 열풍으로 단순지 액체를 박산내내어 완전 분해합니다."></textarea>
+                        <div class="ultimate-hint" id="ultimateHint">📚 힌트북을 사용하여 보스의 약점을 분석하세요!</div>
+                        <div class="ultimate-score">
+                            <span>예상 위력: </span>
+                            <span id="ultimateScore">0%</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="prompt-buttons">
-                    <button class="btn-cast" onclick="castPromptSpell()">
-                        <span class="btn-icon">⚡</span>
-                        <span>마법 시전</span>
+                <div class="ultimate-buttons">
+                    <button class="btn-ultimate" onclick="castUltimateSpell()">
+                        <span class="btn-icon">✨</span>
+                        <span>최강 마법 발동! (Enter)</span>
                     </button>
-                    <button class="btn-cancel" onclick="closePrompt()">취소</button>
+                    <button class="btn-cancel" onclick="closeUltimatePanel()">취소 (ESC)</button>
                 </div>
                 
-                <div class="prompt-tips">
-                    <div class="tip-title">🎯 프롬프트 팁</div>
+                <div class="ultimate-tips">
+                    <div class="tip-title">💡 최강 마법 팁:</div>
                     <ul>
-                        <li>구체적인 숫자와 단계를 명시하면 위력 UP!</li>
-                        <li>Chain-of-thought (단계별 사고) 사용시 보너스</li>
-                        <li>보스전에서는 특별한 키워드가 필요합니다</li>
+                        <li>보스의 특성과 약점을 정확히 분석</li>
+                        <li>단계별로 나눠 상세한 마법 주문</li>
+                        <li>창의적이고 혁신적인 마법 조합</li>
+                        <li>속성, 원소, 반응의 완벽한 활용</li>
+                        <li>마법 이론에 기반한 논리적 주문</li>
                     </ul>
                 </div>
             </div>
             
-            <!-- 보스 정보 패널 -->
-            <div class="boss-panel" id="bossPanel" style="display: none;">
-                <div class="boss-header">⚠️ 보스 등장!</div>
-                <div class="boss-info">
-                    <div class="boss-name" id="bossName">???</div>
-                    <div class="boss-hp-bar">
-                        <div class="boss-hp-fill" id="bossHpBar"></div>
-                    </div>
-                    <div class="boss-weakness">
-                        약점: <span id="bossWeakness">???</span>
-                    </div>
-                    <div class="boss-hint" id="bossHint">
-                        프롬프트에 특정 키워드를 포함시켜보세요!
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 도움말 -->
+            <!-- 게임 상태 -->
             <div class="help-panel">
-                <div class="help-title">📖 조작법</div>
-                <div class="controls-grid">
-                    <div class="control">⬆⬇⬅➡</div><div>이동</div>
-                    <div class="control">SPACE</div><div>공격/대화</div>
-                    <div class="control">P</div><div>프롬프트 마법</div>
-                    <div class="control">1-4</div><div>아이템 사용</div>
-                    <div class="control">ESC</div><div>일시정지</div>
+                <div class="help-title">📊 게임 상태</div>
+                <div class="game-status">
+                    <div class="status-item">
+                        <span class="status-label">게임 모드:</span>
+                        <span class="status-value" id="gameModeDisplay">탐험</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">선택된 대상:</span>
+                        <span class="status-value" id="selectedTarget">없음</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">처치한 몬스터:</span>
+                        <span class="status-value" id="killCountDisplay">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">최고 점수:</span>
+                        <span class="status-value" id="maxScoreDisplay">0%</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 보스전 오버레이 -->
-    <div class="boss-overlay" id="bossOverlay">
-        <div class="boss-intro">
-            <div class="boss-title" id="bossTitle">보스 등장!</div>
-            <div class="boss-sprite" id="bossSprite">🐉</div>
-            <div class="boss-description" id="bossDescription"></div>
-            <button class="btn-fight" onclick="startBossFight()">전투 시작!</button>
-        </div>
-    </div>
-    
-    <!-- 게임 오버 오버레이 -->
-    <div class="game-over-overlay" id="gameOverOverlay">
-        <div class="game-over-content">
-            <h1>GAME OVER</h1>
-            <div class="final-stats">
-                <div>최종 층: <span id="finalFloor">1</span>층</div>
-                <div>최종 레벨: <span id="finalLevel">1</span></div>
-                <div>처치한 몬스터: <span id="finalKills">0</span></div>
-                <div>최고 프롬프트 점수: <span id="finalPromptScore">0</span>%</div>
-            </div>
-            <button class="btn-restart" onclick="location.reload()">다시 시작</button>
-        </div>
-    </div>
-    
-    <!-- 레벨업 이펙트 -->
-    <div class="levelup-effect" id="levelupEffect">
-        LEVEL UP!
-    </div>
-    
+    <!-- 게임 스크립트 -->
     <script src="game.js"></script>
-    <script src="effects.js"></script>
     <script src="prompt-evaluator.js"></script>
-    <script src="boss.js"></script>
 </body>
 </html>

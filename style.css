@@ -1,4 +1,4 @@
-/* style.css - AI 던전 마스터 스타일 */
+/* style.css - 마법소년 김씨의 던전 어드벤처 스타일 */
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -75,8 +75,8 @@ body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-/* HP/EXP 바 */
-.hp-bar, .exp-bar {
+/* HP/EXP/MANA 바 */
+.hp-bar, .exp-bar, .mana-bar {
     width: 120px;
     height: 20px;
     background: #333;
@@ -98,7 +98,13 @@ body {
     transition: width 0.3s ease;
 }
 
-.hp-text, .exp-text {
+.mana-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3742fa, #2f3542);
+    transition: width 0.3s ease;
+}
+
+.hp-text, .exp-text, .mana-text {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -181,52 +187,109 @@ body {
     50% { filter: drop-shadow(0 0 20px #ff00ff); }
 }
 
-/* 퀵슬롯 */
-.quick-slots {
-    display: flex;
-    gap: 10px;
+/* 게임 컨트롤 */
+.game-controls {
     margin-top: 10px;
-    justify-content: center;
+    padding: 15px;
+    background: #0a0a0a;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
 }
 
-.slot {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border: 2px solid #666;
-    border-radius: 8px;
+.control-guide h3 {
+    margin: 0 0 10px 0;
+    color: #FFD700;
+    font-size: 14px;
+}
+
+.controls-list {
     display: flex;
     flex-direction: column;
+    gap: 5px;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.slot:hover {
-    border-color: #FFD700;
-    transform: scale(1.05);
-}
-
-.slot-key {
-    position: absolute;
-    top: 3px;
-    left: 5px;
     font-size: 10px;
-    color: #FFD700;
 }
 
-.slot-icon {
-    font-size: 24px;
-}
-
-.slot-count {
-    position: absolute;
-    bottom: 3px;
-    right: 5px;
-    font-size: 10px;
+.control-item .key {
     color: #4ecdc4;
+    font-weight: bold;
+    padding: 2px 6px;
+    background: rgba(78, 205, 196, 0.1);
+    border-radius: 3px;
+    min-width: 80px;
+    text-align: center;
+}
+
+.control-item .desc {
+    color: #ddd;
+    flex: 1;
+    text-align: right;
+}
+
+/* 커서 스타일 */
+.cursor {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #FFD700;
+    border-radius: 5px;
+    background: rgba(255, 215, 0, 0.2);
+    pointer-events: none;
+    z-index: 50;
+    animation: cursorBlink 1s infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+/* 게임 상태 표시 */
+.game-status {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+}
+
+.status-label {
+    color: #999;
+}
+
+.status-value {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* 프롬프트 점수 표시 */
+.prompt-score {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.prompt-score span:first-child {
+    color: #999;
+}
+
+.prompt-score #liveScore {
+    color: #FFD700;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 /* 사이드 패널 */
@@ -243,7 +306,7 @@ body {
     border: 3px solid #FFD700;
     border-radius: 10px;
     padding: 15px;
-    height: 200px;
+    height: 250px;
     overflow-y: auto;
     font-size: 10px;
     line-height: 1.8;
@@ -299,7 +362,7 @@ body {
 
 .prompt-section textarea {
     width: 100%;
-    height: 60px;
+    min-height: 80px;
     background: #1a1a2e;
     border: 2px solid #444;
     color: white;
@@ -307,7 +370,8 @@ body {
     font-family: 'Courier New', monospace;
     font-size: 11px;
     border-radius: 5px;
-    resize: none;
+    resize: vertical;
+    line-height: 1.4;
 }
 
 .prompt-section textarea:focus {
@@ -486,6 +550,51 @@ body {
     color: #4ecdc4;
 }
 
+/* 프롬프트 버튼 개선 */
+.btn-cast {
+    flex: 1;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: none;
+    padding: 15px;
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.btn-cast:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+.btn-cast:active {
+    transform: scale(0.98);
+}
+
+.btn-cancel {
+    padding: 12px 20px;
+    background: #444;
+    color: white;
+    border: 2px solid #666;
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #555;
+    border-color: #999;
+}
+
 /* 보스 오버레이 */
 .boss-overlay {
     position: fixed;
@@ -662,6 +771,7 @@ body {
     pointer-events: none;
     z-index: 200;
     animation: damageFloat 1s forwards;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
 .damage-text.player-damage {
@@ -679,15 +789,39 @@ body {
 .damage-text.critical {
     color: #ff00ff;
     font-size: 28px;
+    animation: criticalFloat 1.2s forwards;
 }
 
 @keyframes damageFloat {
     0% {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.1);
         opacity: 1;
     }
     100% {
-        transform: translateY(-40px);
+        transform: translateY(-40px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes criticalFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(-10px) scale(1.3);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-25px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(0.9);
         opacity: 0;
     }
 }
@@ -708,4 +842,476 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #FFA500;
+}
+
+/* 객관식 전투 패널 */
+.battle-panel {
+    background: #0a0a0a;
+    border: 3px solid #ff6b6b;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    animation: battlePulse 2s ease-in-out infinite;
+}
+
+@keyframes battlePulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.6); }
+}
+
+.battle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #FFD700;
+}
+
+.battle-timer {
+    color: #ff6b6b;
+    font-weight: bold;
+    animation: timerBlink 1s infinite;
+}
+
+@keyframes timerBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+.battle-question h3 {
+    font-size: 12px;
+    color: #fff;
+    margin-bottom: 15px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.battle-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.choice {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #1a1a2e;
+    border: 2px solid #444;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.choice:hover {
+    border-color: #FFD700;
+    background: #2a2a4e;
+    transform: translateX(5px);
+}
+
+.choice.selected {
+    border-color: #4ecdc4;
+    background: #2a4e4e;
+}
+
+.choice.correct {
+    border-color: #6ab04c;
+    background: #2a4e2a;
+    animation: correctChoice 0.5s;
+}
+
+.choice.wrong {
+    border-color: #ff6b6b;
+    background: #4e2a2a;
+    animation: wrongChoice 0.5s;
+}
+
+@keyframes correctChoice {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes wrongChoice {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.choice-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    background: #FFD700;
+    color: #000;
+    font-weight: bold;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 12px;
+}
+
+.choice-text {
+    flex: 1;
+    font-size: 11px;
+    color: #ddd;
+}
+
+.choice-result {
+    font-size: 16px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.battle-hint {
+    font-size: 10px;
+    color: #999;
+    text-align: center;
+    font-style: italic;
+}
+
+/* 필살기 패널 */
+.ultimate-panel {
+    background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
+    border: 3px solid #e91e63;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    animation: ultimatePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ultimatePulse {
+    0%, 100% { box-shadow: 0 0 25px rgba(233, 30, 99, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(233, 30, 99, 0.8); }
+}
+
+.ultimate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #FFD700;
+}
+
+.ultimate-power {
+    color: #e91e63;
+    font-weight: bold;
+}
+
+.ultimate-section {
+    margin-bottom: 15px;
+}
+
+.ultimate-section label {
+    display: block;
+    font-size: 11px;
+    color: #FFD700;
+    margin-bottom: 5px;
+}
+
+.ultimate-section textarea {
+    width: 100%;
+    min-height: 80px;
+    background: #1a1a2e;
+    border: 2px solid #e91e63;
+    color: white;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    border-radius: 5px;
+    resize: vertical;
+    line-height: 1.4;
+}
+
+.ultimate-section textarea:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.ultimate-hint {
+    font-size: 9px;
+    color: #ddd;
+    margin-top: 5px;
+}
+
+.ultimate-score {
+    font-size: 12px;
+    color: #FFD700;
+    margin-top: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.ultimate-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.btn-ultimate {
+    flex: 1;
+    background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ultimate:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(233, 30, 99, 0.7);
+}
+
+.btn-ultimate:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-ultimate:hover:before {
+    left: 100%;
+}
+
+.ultimate-tips {
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 9px;
+}
+
+.tip-title {
+    color: #FFD700;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.ultimate-tips ul {
+    list-style: none;
+    color: #ddd;
+}
+
+.ultimate-tips li {
+    margin-bottom: 3px;
+    padding-left: 15px;
+    position: relative;
+}
+
+.ultimate-tips li:before {
+    content: "✨";
+    position: absolute;
+    left: 0;
+    color: #e91e63;
+}
+
+/* 콤보 텍스트 */
+.combo-text {
+    position: absolute;
+    font-size: 18px;
+    font-weight: bold;
+    color: #FFD700;
+    pointer-events: none;
+    z-index: 200;
+    animation: comboFloat 1.5s forwards;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+@keyframes comboFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-15px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* 스펠 효과 텍스트 */
+.spell-effect {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 200;
+    animation: spellEffectFloat 1.2s forwards;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.spell-effect.spell-heal {
+    color: #6ab04c;
+}
+
+.spell-effect.spell-fireball {
+    color: #ff4757;
+}
+
+.spell-effect.spell-meteor {
+    color: #ff6348;
+}
+
+.spell-effect.spell-lightning {
+    color: #3742fa;
+}
+
+@keyframes spellEffectFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-12px) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-25px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* 스펠 애니메이션 */
+.spell-animation {
+    position: absolute;
+    font-size: 32px;
+    pointer-events: none;
+    z-index: 150;
+    animation: spellCast 0.8s forwards;
+}
+
+.spell-animation.spell-fireball {
+    animation: fireballCast 0.8s forwards;
+}
+
+.spell-animation.spell-meteor {
+    animation: meteorCast 0.8s forwards;
+}
+
+.spell-animation.spell-lightning {
+    animation: lightningCast 0.8s forwards;
+}
+
+.spell-animation.spell-heal {
+    animation: healCast 0.8s forwards;
+}
+
+@keyframes spellCast {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes fireballCast {
+    0% {
+        transform: scale(0.5) rotate(0deg);
+        opacity: 1;
+        filter: hue-rotate(0deg);
+    }
+    50% {
+        transform: scale(2) rotate(180deg);
+        opacity: 1;
+        filter: hue-rotate(90deg);
+    }
+    100% {
+        transform: scale(1.5) rotate(360deg);
+        opacity: 0;
+        filter: hue-rotate(180deg);
+    }
+}
+
+@keyframes meteorCast {
+    0% {
+        transform: scale(0.8) translateY(-20px) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.5) translateY(-10px) rotate(90deg);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(2) translateY(5px) rotate(270deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5) translateY(10px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes lightningCast {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+        filter: brightness(1);
+    }
+    25% {
+        transform: scale(1.5) rotate(0deg);
+        opacity: 1;
+        filter: brightness(2);
+    }
+    50% {
+        transform: scale(2) rotate(0deg);
+        opacity: 1;
+        filter: brightness(3);
+    }
+    75% {
+        transform: scale(1.5) rotate(0deg);
+        opacity: 1;
+        filter: brightness(2);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0;
+        filter: brightness(1);
+    }
+}
+
+@keyframes healCast {
+    0% {
+        transform: scale(0.5) translateY(0px);
+        opacity: 1;
+    }
+    33% {
+        transform: scale(1.2) translateY(-10px);
+        opacity: 1;
+    }
+    66% {
+        transform: scale(1.5) translateY(-5px);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) translateY(0px);
+        opacity: 0;
+    }
 }
