@@ -7,6 +7,16 @@ const CELL_SIZE = 40;
 const OPENROUTER_API_KEY = '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';
 const OPENROUTER_MODEL = 'qwen/qwen3-235b-a22b-2507';
 
+// 아이템 등급
+const ITEM_RARITY = {
+    COMMON: { name: '일반', color: '#808080', multiplier: 1 },
+    UNCOMMON: { name: '고급', color: '#1eff00', multiplier: 1.2 },
+    RARE: { name: '희귀', color: '#0070ff', multiplier: 1.5 },
+    EPIC: { name: '영웅', color: '#a335ee', multiplier: 2 },
+    LEGENDARY: { name: '전설', color: '#ff8000', multiplier: 3 },
+    MYTHIC: { name: '신화', color: '#ff00ff', multiplier: 5 }
+};
+
 // 게임 상태
 const game = {
     floor: 1,
@@ -25,7 +35,34 @@ const game = {
         streak: 0,
         maxStreak: 0,
         spellsLearned: ['fireball', 'heal'], // 기본 마법
-        totalKills: 0
+        totalKills: 0,
+        equipment: {
+            weapon: null,
+            armor: null,
+            accessory: null
+        },
+        skillPoints: 0,
+        skills: {
+            strength: 0,
+            magic: 0,
+            vitality: 0,
+            dexterity: 0
+        },
+        criticalChance: 5, // 5% 기본 크리티컬
+        criticalDamage: 150, // 150% 크리티컬 데미지
+        buffs: [],
+        shieldActive: false,
+        berserkTimer: 0,
+        gold: 0,
+        inventory: [],
+        maxInventory: 20,
+        craftingMaterials: {
+            essences: 0,
+            crystals: 0,
+            scrolls: 0
+        },
+        enhancementHistory: [],
+        totalEnhancements: 0
     },
     map: [],
     entities: [],
@@ -53,6 +90,31 @@ const game = {
     animations: {
         enabled: true,
         speed: 200  // 애니메이션 속도 (ms)
+    },
+    difficulty: 1.0,
+    questSystem: {
+        activeQuests: [],
+        completedQuests: [],
+        availableQuests: []
+    },
+    dungeonEvents: [],
+    currentEvent: null,
+    soundEnabled: true,
+    particles: [],
+    achievements: [],
+    combo: {
+        count: 0,
+        multiplier: 1.0,
+        timer: 0
+    },
+    itemForge: {
+        isOpen: false,
+        selectedItem: null,
+        enhancementLevel: 0
+    },
+    dungeonShop: {
+        isOpen: false,
+        items: []
     }
 };
 
@@ -62,8 +124,67 @@ const TILES = {
     WALL: 1,
     DOOR: 2,
     CHEST: 3,
-    STAIRS: 4
+    STAIRS: 4,
+    FORGE: 5,
+    SHOP: 6
 };
+
+// 아이템 타입
+const ITEM_TYPES = {
+    WEAPON: {
+        name: '무기',
+        slot: 'weapon',
+        baseStats: ['attack'],
+        prefixes: ['날카로운', '강력한', '치명적인', '파괴의', '전설의'],
+        items: [
+            { name: '녹슨 검', attack: 5, icon: '⚔️' },
+            { name: '마법 지팡이', attack: 8, magic: 3, icon: '🎯' },
+            { name: '전투 도끼', attack: 12, icon: '🪓' },
+            { name: '아크 스태프', attack: 6, magic: 6, icon: '🪄' },
+            { name: '룬 검', attack: 15, criticalChance: 5, icon: '🌙' }
+        ]
+    },
+    ARMOR: {
+        name: '방어구',
+        slot: 'armor',
+        baseStats: ['defense', 'hp'],
+        prefixes: ['단단한', '강철의', '불굴의', '수호의', '방어의'],
+        items: [
+            { name: '가죽 갑옷', defense: 3, hp: 10, icon: '🏽' },
+            { name: '철 갑옷', defense: 5, hp: 20, icon: '🛡️' },
+            { name: '마법 로브', defense: 4, magic: 5, hp: 15, icon: '🥼' },
+            { name: '용비늬 갑옷', defense: 8, hp: 35, icon: '🐉' },
+            { name: '성기사 갑옷', defense: 7, hp: 30, magic: 3, icon: '✨' }
+        ]
+    },
+    ACCESSORY: {
+        name: '액세서리',
+        slot: 'accessory',
+        baseStats: ['various'],
+        prefixes: ['빛나는', '마법의', '행운의', '지혜의', '신비한'],
+        items: [
+            { name: '힘의 반지', attack: 3, icon: '💍' },
+            { name: '보호의 목걸이', defense: 3, icon: '🔔' },
+            { name: '마나 크리스탈', magic: 8, mana: 20, icon: '🔮' },
+            { name: '빠른 부츠', dexterity: 5, icon: '👢' },
+            { name: '생명의 벨트', hp: 50, icon: '🪙' }
+        ]
+    }
+};
+
+// 강화 레벨별 요구사항
+const ENHANCEMENT_REQUIREMENTS = [
+    { level: 1, essences: 5, crystals: 0, scrolls: 0, gold: 100, successRate: 90 },
+    { level: 2, essences: 10, crystals: 2, scrolls: 0, gold: 200, successRate: 80 },
+    { level: 3, essences: 15, crystals: 5, scrolls: 1, gold: 400, successRate: 70 },
+    { level: 4, essences: 20, crystals: 8, scrolls: 2, gold: 800, successRate: 60 },
+    { level: 5, essences: 30, crystals: 12, scrolls: 3, gold: 1600, successRate: 50 },
+    { level: 6, essences: 40, crystals: 16, scrolls: 5, gold: 3200, successRate: 40 },
+    { level: 7, essences: 50, crystals: 20, scrolls: 7, gold: 6400, successRate: 30 },
+    { level: 8, essences: 70, crystals: 25, scrolls: 10, gold: 12800, successRate: 20 },
+    { level: 9, essences: 90, crystals: 30, scrolls: 15, gold: 25600, successRate: 15 },
+    { level: 10, essences: 120, crystals: 40, scrolls: 20, gold: 51200, successRate: 10 }
+];
 
 // 스펠 데이터 (AOE 마법 시스템)
 const SPELLS = {
@@ -208,6 +329,102 @@ const BOSS_DATA = {
         weakness: '얼음과 신성한 마법의 조합'
     }
 };
+
+// 아이템 생성 함수
+function generateRandomItem(typeKey, rarityLevel = 0) {
+    const type = ITEM_TYPES[typeKey];
+    if (!type) return null;
+    
+    const baseItem = type.items[Math.floor(Math.random() * type.items.length)];
+    const rarityKeys = Object.keys(ITEM_RARITY);
+    const rarityIndex = Math.min(rarityKeys.length - 1, Math.floor(Math.random() * 3) + rarityLevel);
+    const rarity = ITEM_RARITY[rarityKeys[rarityIndex]];
+    
+    const item = {
+        ...baseItem,
+        id: Date.now() + Math.random(),
+        type: typeKey,
+        rarity: rarityKeys[rarityIndex],
+        enhancementLevel: 0,
+        prefix: type.prefixes[Math.floor(Math.random() * type.prefixes.length)],
+        baseStats: { ...baseItem }
+    };
+    
+    // 희귀도에 따른 스탯 보정
+    Object.keys(item.baseStats).forEach(stat => {
+        if (typeof item.baseStats[stat] === 'number') {
+            item[stat] = Math.floor(item.baseStats[stat] * rarity.multiplier);
+        }
+    });
+    
+    return item;
+}
+
+// 아이템 장착
+function equipItem(item) {
+    if (!item || !item.type) return;
+    
+    const type = ITEM_TYPES[item.type];
+    if (!type) return;
+    
+    // 기존 장비 해제
+    const oldItem = game.player.equipment[type.slot];
+    if (oldItem) {
+        unequipItem(oldItem);
+        game.player.inventory.push(oldItem);
+    }
+    
+    // 새 아이템 장착
+    game.player.equipment[type.slot] = item;
+    
+    // 스탯 적용
+    Object.keys(item).forEach(stat => {
+        if (typeof item[stat] === 'number' && stat !== 'id' && stat !== 'enhancementLevel') {
+            if (game.player[stat] !== undefined) {
+                game.player[stat] += item[stat];
+            } else if (stat === 'hp') {
+                game.player.maxHp += item[stat];
+                game.player.hp += item[stat];
+            } else if (stat === 'mana') {
+                game.maxMana += item[stat];
+                game.manaPoints += item[stat];
+            } else if (stat === 'magic') {
+                game.player.attack += Math.floor(item[stat] / 2);
+            }
+        }
+    });
+    
+    // 인벤토리에서 제거
+    const index = game.player.inventory.indexOf(item);
+    if (index > -1) {
+        game.player.inventory.splice(index, 1);
+    }
+    
+    addMessage(`🎮 ${item.prefix} ${item.name}(+${item.enhancementLevel}) 장착!`, 'loot');
+    updateStats();
+}
+
+// 아이템 해제
+function unequipItem(item) {
+    if (!item) return;
+    
+    // 스탯 제거
+    Object.keys(item).forEach(stat => {
+        if (typeof item[stat] === 'number' && stat !== 'id' && stat !== 'enhancementLevel') {
+            if (game.player[stat] !== undefined) {
+                game.player[stat] -= item[stat];
+            } else if (stat === 'hp') {
+                game.player.maxHp -= item[stat];
+                game.player.hp = Math.min(game.player.hp, game.player.maxHp);
+            } else if (stat === 'mana') {
+                game.maxMana -= item[stat];
+                game.manaPoints = Math.min(game.manaPoints, game.maxMana);
+            } else if (stat === 'magic') {
+                game.player.attack -= Math.floor(item[stat] / 2);
+            }
+        }
+    });
+}
 
 // 게임 인트로 시나리오
 function showGameIntro() {

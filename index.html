@@ -14,7 +14,7 @@
                 <div class="stat-group">
                     <div class="stat">⚔️ <span id="attack">8</span></div>
                     <div class="stat">🛡️ <span id="defense">3</span></div>
-                    <div class="stat">📚 <span id="magic">0</span></div>
+                    <div class="stat">💰 <span id="gold">0</span></div>
                 </div>
                 <div class="floor-display">
                     <span class="floor-text">FLOOR</span>
@@ -73,6 +73,18 @@
                             <span class="key">1,2,3,4</span>
                             <span class="desc">전투 선택</span>
                         </div>
+                        <div class="control-item">
+                            <span class="key">I</span>
+                            <span class="desc">인벤토리</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">G</span>
+                            <span class="desc">강화소</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">B</span>
+                            <span class="desc">상점</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,6 +130,38 @@
                     </div>
                     <div class="battle-hint" id="battleHint">💡 몬스터의 특성을 고려해보세요!</div>
                 </div>
+            </div>
+            
+            <!-- 인벤토리 패널 -->
+            <div class="inventory-panel" id="inventoryPanel" style="display: none;">
+                <div class="panel-header">
+                    <span>🎮 인벤토리</span>
+                    <button class="close-btn" onclick="closeInventory()">×</button>
+                </div>
+                <div id="inventoryContent" class="panel-content">
+                    <!-- 인벤토리 내용 -->
+                </div>
+            </div>
+            
+            <!-- 강화 패널 -->
+            <div class="forge-panel" id="forgePanel" style="display: none;">
+                <div class="panel-header">
+                    <span>🔨 아이템 강화소</span>
+                    <button class="close-btn" onclick="closeItemForge()">×</button>
+                </div>
+                <div class="forge-resources">
+                    <span>🌌 정수: <span id="essenceCount">0</span></span>
+                    <span>💎 크리스탈: <span id="crystalCount">0</span></span>
+                    <span>📜 주문서: <span id="scrollCount">0</span></span>
+                    <span>💰 골드: <span id="goldCount">0</span></span>
+                </div>
+                <div id="inventoryList" class="inventory-list"></div>
+                <div id="selectedItemInfo" class="item-info"></div>
+                <div class="enhancement-prompt">
+                    <label for="enhancementPrompt">강화 주문 (상세할수록 성공률 UP!):</label>
+                    <textarea id="enhancementPrompt" placeholder="예: 이 검에 고대 룬의 힙을 불어넣어 날카로운 빛을 내게 하고, 주변의 마나를 흡수하여 더욱 강력하게 만든다..." rows="4"></textarea>
+                </div>
+                <button id="enhanceButton" onclick="enhanceItem()" class="enhance-btn" style="display: none;">🔨 강화 시작</button>
             </div>
             
             <!-- 필살기 패널 (보스전 전용) -->
@@ -185,7 +229,6 @@
     </div>
     
     <!-- 게임 스크립트 -->
-    <script src="game.js"></script>
-    <script src="prompt-evaluator.js"></script>
+    <script src="game-enhanced.js"></script>
 </body>
 </html>

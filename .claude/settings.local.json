@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(move game.js game-old.js)",
+      "Bash(move game-new.js game.js)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "Bash(taskkill:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}
